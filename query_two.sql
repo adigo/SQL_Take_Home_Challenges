@@ -40,9 +40,15 @@ with inBoth as (
 	we.user_id = mo.user_id
 	where
 	mo.user_id is null
+), oneRow as (
+	select
+	(select count(*) from inMobileOnly) as mobOnly,
+	(select count(*) from inWebOnly) as webOnly,
+	(select count(*) from inBoth) as mobNWeb
 )
 select 
-100 * (select count(*) from inMobileOnly) / ((select count(*) from inBoth) + (select count(*) from inMobileOnly) + (select count(*) from inWebOnly)) as mobile_only,
-100 * (select count(*) from inWebOnly) / ((select count(*) from inBoth) + (select count(*) from inMobileOnly) + (select count(*) from inWebOnly)) as web_only,
-100 * (select count(*) from inBoth) / ((select count(*) from inBoth) + (select count(*) from inMobileOnly) + (select count(*) from inWebOnly)) as both
+100 * mobOnly / (mobOnly + webOnly + mobNWeb) as mobile_only,
+100 * webOnly / (mobOnly + webOnly + mobNWeb) as web_only,
+100 * mobNWeb / (mobOnly + webOnly + mobNWeb) as both
+from oneRow
 ;
